@@ -29,6 +29,10 @@ public class IncidenteController {
     public List<Incidente> listar() {
         return servicio.listar();
     }
+    @GetMapping("/pendientes")
+    public List<Incidente> listarPendientes() {
+        return servicio.listarPendientes();
+    }
     @GetMapping("/{id}")
     public ResponseEntity<Incidente> buscarPorId(@PathVariable long id) {
         return servicio.buscarPorId(id)
