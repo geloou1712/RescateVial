@@ -6,11 +6,13 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import java.util.Optional;
 import com.example.rescatevial.dto.CrearIncidenteDTO;
+import com.example.rescatevial.structures.ColaIncidentesPendientes;
 
 @Service
 public class IncidenteService {
 
     private final List<Incidente> incidentes = new ArrayList<>();
+    private final ColaIncidentesPendientes pendientes = new ColaIncidentesPendientes();
 
     private long siguienteId = 4;
 
@@ -32,12 +34,26 @@ public class IncidenteService {
                 19.4200, -99.1500,
                 "BAJA", "PENDIENTE", 3L, 3L
         ));
+
+        for (Incidente incidente : incidentes) {
+            if ("PENDIENTE".equalsIgnoreCase(incidente.estado())) {
+                pendientes.encolar(incidente);
+            }
+        }
+
     }
     public synchronized List<Incidente> listar() {
         return List.copyOf(incidentes);
 
 
+
+
     }
+
+    public synchronized List<Incidente> listarPendientes() {
+        return pendientes.aLista();
+    }
+
     public synchronized Optional<Incidente> buscarPorId(long id) {
         return incidentes.stream()
                 .filter(incidente -> incidente.id() == id)
@@ -56,6 +72,11 @@ public class IncidenteService {
         );
 
         incidentes.add(incidente);
+
+        if ("PENDIENTE".equalsIgnoreCase(incidente.estado())) {
+            pendientes.encolar(incidente);
+        }
+
         return incidente;
     }
 }
