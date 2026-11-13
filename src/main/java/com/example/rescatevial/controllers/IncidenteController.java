@@ -35,9 +35,8 @@ public class IncidenteController {
     }
     @GetMapping("/{id}")
     public ResponseEntity<Incidente> buscarPorId(@PathVariable long id) {
-        return servicio.buscarPorId(id)
-                .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+        return ResponseEntity.ok(servicio.buscarPorId(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "El incidente no existe")));
     }
     @PostMapping
     public ResponseEntity<Incidente> crear(@RequestBody CrearIncidenteDTO datos) {
