@@ -1,11 +1,11 @@
 {
   "info": {
-    "_postman_id": "1cc717f6-421f-4e05-a4fb-d379071f49e8",
+    "_postman_id": "c59e4350-2a11-414f-a157-8426855e5858",
     "name": "RescateVial API",
     "description": "Solicitudes de los módulos implementados de RescateVial. Configure baseUrl antes de ejecutar.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "_exporter_id": "59322071",
-    "_collection_link": "https://go.postman.co/collection/59322071-1cc717f6-421f-4e05-a4fb-d379071f49e8?source=collection_link"
+    "_collection_link": "https://go.postman.co/collection/59322071-c59e4350-2a11-414f-a157-8426855e5858?source=collection_link"
   },
   "item": [
     {
@@ -13,6 +13,19 @@
       "item": [
         {
           "name": "Estado de la aplicación",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta HTTP 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [],
@@ -27,6 +40,10 @@
               ]
             }
           },
+          "response": []
+        },
+        {
+          "name": "Estado de la base de datos",
           "event": [
             {
               "listen": "test",
@@ -39,10 +56,7 @@
                 ]
               }
             }
-          ]
-        },
-        {
-          "name": "Estado de la base de datos",
+          ],
           "request": {
             "method": "GET",
             "header": [],
@@ -59,6 +73,15 @@
             },
             "description": "Requiere integrar el PR de health y configurar una conexión PostgreSQL. Devuelve 200 si está disponible o 503 si no lo está."
           },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Usuarios",
+      "item": [
+        {
+          "name": "Listar usuarios",
           "event": [
             {
               "listen": "test",
@@ -71,15 +94,7 @@
                 ]
               }
             }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "Usuarios",
-      "item": [
-        {
-          "name": "Listar usuarios",
+          ],
           "request": {
             "method": "GET",
             "header": [],
@@ -94,6 +109,10 @@
               ]
             }
           },
+          "response": []
+        },
+        {
+          "name": "Consultar usuario por ID",
           "event": [
             {
               "listen": "test",
@@ -106,10 +125,7 @@
                 ]
               }
             }
-          ]
-        },
-        {
-          "name": "Consultar usuario por ID",
+          ],
           "request": {
             "method": "GET",
             "header": [],
@@ -125,50 +141,10 @@
               ]
             }
           },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test(\"Respuesta HTTP 200\", function () {",
-                  "    pm.response.to.have.status(200);",
-                  "});"
-                ]
-              }
-            }
-          ]
+          "response": []
         },
         {
           "name": "Crear usuario",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/usuarios",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "usuarios"
-              ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"nombre\": \"Carlos López\",\n  \"correo\": \"carlos@example.com\",\n  \"telefono\": \"5550000004\",\n  \"rol\": \"CIUDADANO\",\n  \"estado\": \"ACTIVO\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          },
           "event": [
             {
               "listen": "test",
@@ -181,7 +157,36 @@
                 ]
               }
             }
-          ]
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Carlos López\",\n  \"correo\": \"carlos@example.com\",\n  \"telefono\": \"5550000004\",\n  \"rol\": \"CIUDADANO\",\n  \"estado\": \"ACTIVO\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/usuarios",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "usuarios"
+              ]
+            }
+          },
+          "response": []
         }
       ]
     },
@@ -190,6 +195,19 @@
       "item": [
         {
           "name": "Listar incidentes",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta HTTP 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [],
@@ -204,6 +222,10 @@
               ]
             }
           },
+          "response": []
+        },
+        {
+          "name": "Listar incidentes pendientes",
           "event": [
             {
               "listen": "test",
@@ -216,10 +238,7 @@
                 ]
               }
             }
-          ]
-        },
-        {
-          "name": "Listar incidentes pendientes",
+          ],
           "request": {
             "method": "GET",
             "header": [],
@@ -235,6 +254,10 @@
               ]
             }
           },
+          "response": []
+        },
+        {
+          "name": "Consultar incidente por ID",
           "event": [
             {
               "listen": "test",
@@ -247,10 +270,7 @@
                 ]
               }
             }
-          ]
-        },
-        {
-          "name": "Consultar incidente por ID",
+          ],
           "request": {
             "method": "GET",
             "header": [],
@@ -266,50 +286,10 @@
               ]
             }
           },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test(\"Respuesta HTTP 200\", function () {",
-                  "    pm.response.to.have.status(200);",
-                  "});"
-                ]
-              }
-            }
-          ]
+          "response": []
         },
         {
           "name": "Crear incidente",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/incidentes",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "incidentes"
-              ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"descripcion\": \"Vehículo detenido en la vía\",\n  \"latitud\": 19.4326,\n  \"longitud\": -99.1332,\n  \"prioridad\": \"ALTA\",\n  \"estado\": \"PENDIENTE\",\n  \"usuarioId\": 1,\n  \"tipoIncidenteId\": 1\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          },
           "event": [
             {
               "listen": "test",
@@ -322,7 +302,100 @@
                 ]
               }
             }
-          ]
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"descripcion\": \"Vehículo detenido en la vía\",\n  \"latitud\": 19.4326,\n  \"longitud\": -99.1332,\n  \"prioridad\": \"ALTA\",\n  \"estado\": \"PENDIENTE\",\n  \"usuarioId\": 1,\n  \"tipoIncidenteId\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/incidentes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "incidentes"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Listar tipos de incidente.",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/tipos-incidente",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "tipos-incidente"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Obtener tipo de incidente por id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/tipos-incidente/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "tipos-incidente",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Crear tipo de incidente",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"nombre\": \"Derrumbe\",\r\n  \"descripcion\": \"Deslizamiento de tierra que bloquea la vía\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/tipos-incidente",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "tipos-incidente"
+              ]
+            }
+          },
+          "response": []
         }
       ]
     },
@@ -331,6 +404,19 @@
       "item": [
         {
           "name": "Listar asignaciones",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Respuesta HTTP 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [],
@@ -345,6 +431,10 @@
               ]
             }
           },
+          "response": []
+        },
+        {
+          "name": "Consultar asignación por ID",
           "event": [
             {
               "listen": "test",
@@ -357,10 +447,7 @@
                 ]
               }
             }
-          ]
-        },
-        {
-          "name": "Consultar asignación por ID",
+          ],
           "request": {
             "method": "GET",
             "header": [],
@@ -376,50 +463,10 @@
               ]
             }
           },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test(\"Respuesta HTTP 200\", function () {",
-                  "    pm.response.to.have.status(200);",
-                  "});"
-                ]
-              }
-            }
-          ]
+          "response": []
         },
         {
           "name": "Crear asignación",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/asignaciones",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "asignaciones"
-              ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"incidenteId\": 1,\n  \"unidadId\": 1,\n  \"fechaHoraAsignacion\": \"2026-11-13T10:30:00\",\n  \"estado\": \"PENDIENTE\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          },
           "event": [
             {
               "listen": "test",
@@ -432,7 +479,36 @@
                 ]
               }
             }
-          ]
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"incidenteId\": 1,\n  \"unidadId\": 1,\n  \"fechaHoraAsignacion\": \"2026-11-13T10:30:00\",\n  \"estado\": \"PENDIENTE\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/asignaciones",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "asignaciones"
+              ]
+            }
+          },
+          "response": []
         }
       ]
     },
@@ -519,8 +595,7 @@
   "variable": [
     {
       "key": "baseUrl",
-      "value": "http://localhost:8080",
-      "type": "string"
+      "value": "http://localhost:8080"
     }
   ]
 }
