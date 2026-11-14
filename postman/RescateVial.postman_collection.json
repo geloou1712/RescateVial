@@ -332,70 +332,6 @@
             }
           },
           "response": []
-        },
-        {
-          "name": "Listar tipos de incidente.",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/tipos-incidente",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "tipos-incidente"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Obtener tipo de incidente por id",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/tipos-incidente/1",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "tipos-incidente",
-                "1"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Crear tipo de incidente",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": "{\r\n  \"nombre\": \"Derrumbe\",\r\n  \"descripcion\": \"Deslizamiento de tierra que bloquea la vía\"\r\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{baseUrl}}/api/tipos-incidente",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "tipos-incidente"
-              ]
-            }
-          },
-          "response": []
         }
       ]
     },
@@ -513,62 +449,53 @@
       ]
     },
     {
-      "name": "Ejemplos originales de Postman",
+      "name": "Unidades",
       "item": [
         {
-          "name": "Get data",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test(\"Status code is 200\", function () {",
-                  "    pm.response.to.have.status(200);",
-                  "});"
-                ]
-              }
-            }
-          ],
+          "name": "Listar Unidades",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "postman-echo.com/get",
+              "raw": "{{baseUrl}}/api/unidades",
               "host": [
-                "postman-echo",
-                "com"
+                "{{baseUrl}}"
               ],
               "path": [
-                "get"
+                "api",
+                "unidades"
               ]
-            },
-            "description": "This is a GET request and it is used to \"get\" data from an endpoint. There is no request body for a GET request, but you can use query parameters to help specify the resource you want data on (e.g., in this request, we have `id=1`).\n\nA successful GET response will have a `200 OK` status, and should include some kind of response body - for example, HTML web content or JSON data."
+            }
           },
           "response": []
         },
         {
-          "name": "Post data",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test(\"Successful POST request\", function () {",
-                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
-                  "});",
-                  ""
-                ]
-              }
+          "name": "Consultar unidades por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/unidades/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "unidades",
+                "1"
+              ]
             }
-          ],
+          },
+          "response": []
+        },
+        {
+          "name": "Crear unidad",
           "request": {
             "method": "POST",
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n\t\"name\": \"Add your name in the body\"\n}",
+              "raw": "{\r\n  \"nombre\": \"Ambulancia 05\",\r\n  \"estado\": \"DISPONIBLE\",\r\n  \"latitud\": 19.43,\r\n  \"longitud\": -99.13,\r\n  \"servicioApoyoId\": 1\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -576,16 +503,146 @@
               }
             },
             "url": {
-              "raw": "postman-echo.com/post",
+              "raw": "{{baseUrl}}/api/unidades",
               "host": [
-                "postman-echo",
-                "com"
+                "{{baseUrl}}"
               ],
               "path": [
-                "post"
+                "api",
+                "unidades"
               ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Servicios de apoyo",
+      "item": [
+        {
+          "name": "Listar Servicios de apoyo",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": ""
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Consultar servicio de apoyo por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/servicios-apoyo/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "servicios-apoyo",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Crear servicio de apoyo",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"nombre\": \"Protección Civil\",\r\n  \"descripcion\": \"Coordinación y asistencia en emergencias\",\r\n  \"telefono\": \"911\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
-            "description": "This is a POST request, submitting data to an API via the request body. This request submits JSON data, and the data is reflected in the response.\n\nA successful POST request typically returns a `200 OK` or `201 Created` response code."
+            "url": {
+              "raw": "{{baseUrl}}/api/servicios-apoyo",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "servicios-apoyo"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Tipos de incidentes",
+      "item": [
+        {
+          "name": "Listar tipos de incidente.",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/tipos-incidente",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "tipos-incidente"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Crear tipo de incidente",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"nombre\": \"Derrumbe\",\r\n  \"descripcion\": \"Deslizamiento de tierra que bloquea la vía\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/tipos-incidente",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "tipos-incidente"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Obtener tipo de incidente por id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/tipos-incidente/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "tipos-incidente",
+                "1"
+              ]
+            }
           },
           "response": []
         }

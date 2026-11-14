@@ -46,3 +46,29 @@ La aplicación debe estar iniciada para consultar ambos endpoints. Para comproba
 Los incidentes con estado `PENDIENTE` se agregan a una cola propia basada en nodos. `IncidenteService` la usa para mantener el orden y consultar los pendientes.
 
 - `GET /api/incidentes/pendientes`: devuelve la lista de incidentes pendientes.
+
+# Integrantes
+
+| Autor | GitHub |
+| --- | --- |
+| Angel Omar Luna Castillo | [@geloou1712](https://github.com/geloou1712) |
+| Santiago Ley Rodriguez | [@santiagoleymy-lang](https://github.com/santiagoleymy-lang) |
+
+## Módulos y endpoints
+
+- **Usuarios:** `GET /api/usuarios`, `GET /api/usuarios/{id}`, `POST /api/usuarios`
+- **Incidentes:** `GET /api/incidentes`, `GET /api/incidentes/{id}`, `POST /api/incidentes`, `GET /api/incidentes/pendientes`
+- **Asignaciones:** `GET /api/asignaciones`, `GET /api/asignaciones/{id}`, `POST /api/asignaciones`
+- **Tipos de incidente:** `GET /api/tipos-incidente`, `GET /api/tipos-incidente/{id}`, `POST /api/tipos-incidente`
+- **Unidades:** `GET /api/unidades`, `GET /api/unidades/{id}`, `POST /api/unidades`
+- **Servicios de apoyo:** `GET /api/servicios-apoyo`, `GET /api/servicios-apoyo/{id}`, `POST /api/servicios-apoyo`
+
+### Salud
+
+- `GET /api/health`
+- `GET /api/health/db`
+
+## Estructuras de datos
+
+- **Lista enlazada propia:** `ListaEnlazada`, implementada con nodos y usada por los servicios para mantener sus registros en memoria.
+- **Cola propia:** `ColaIncidentesPendientes`, implementada con nodos y usada para mantener el orden de los incidentes pendientes.
