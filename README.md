@@ -1,10 +1,10 @@
 # RescateVial
 
-API para registrar y consultar usuarios, incidentes y asignaciones de un sistema de atención vial. Actualmente los datos de los módulos se almacenan en memoria y se reinician al detener la aplicación.
+API para registrar y consultar usuarios, incidentes y asignaciones de un sistema de atención vial. La autenticación y los usuarios se guardan en PostgreSQL (Neon). Los demás módulos conservan sus estructuras en memoria y se reinician al detener la aplicación.
 
 ## Requisitos
 
-- Java 17 y PostgreSQL si se desea comprobar la conexión a la base de datos.
+- Java 17 y una base PostgreSQL disponible para autenticación y usuarios.
 - El proyecto incluye Gradle Wrapper; no es necesario instalar Gradle por separado.
 
 ## Configuración local
@@ -18,7 +18,7 @@ API para registrar y consultar usuarios, incidentes y asignaciones de un sistema
 2. Ajusta en `.env` `DB_URL`, `DB_USERNAME` y `DB_PASSWORD` según tu instalación local de PostgreSQL. La URL de ejemplo apunta a una base llamada `rescatevial`.
 3. No subas `.env` a Git: está excluido en `.gitignore`. El archivo `.env.example` muestra los nombres de las variables sin guardar contraseñas.
 
-Spring carga el archivo `.env` desde la raíz al iniciar la aplicación. El endpoint de salud de base de datos comprueba la conexión, pero los módulos todavía no guardan información en PostgreSQL.
+Spring carga `.env` desde la raíz al iniciar la aplicación. Configura también `JWT_SECRET`, `JWT_EXPIRACION_HORAS` (8 por defecto) y `CORS_ORIGENES`. Para Neon usa una URL JDBC con `sslmode=require&channelBinding=require`. El esquema inicial está en `sql/001_roles_usuarios.sql`: se aplica una sola vez a una base nueva. En la base de desarrollo RescateVial ya está aplicado.
 
 ## Ejecutar
 
@@ -67,6 +67,36 @@ Los incidentes con estado `PENDIENTE` se agregan a una cola propia basada en nod
 
 - `GET /api/health`
 - `GET /api/health/db`
+
+## Autenticación y permisos
+
+- `POST /api/auth/registro`: recibe `name`, `email`, `password` (mínimo 6 caracteres) y `role` opcional. Devuelve el usuario con HTTP 201.
+- `POST /api/auth/login`: recibe `email`, `password` y `role` opcional. Devuelve `{ "token": "...", "user": { "id": 1, "name": "...", "email": "...", "role": "ciudadano", "roles": ["ciudadano"] } }`.
+- `GET /api/auth/yo`: requiere `Authorization: Bearer <token>` y devuelve el usuario autenticado.
+- Los errores incluyen `message`, que consume el frontend. Se conservan los campos anteriores del error (`mensaje`, estado, fecha y ruta).
+- Todas las rutas `/api/**` requieren token, excepto login, registro y health. Los preflight OPTIONS se atienden mediante CORS.
+- `/api/usuarios` y `/api/usuarios/{id}` requieren `ADMINISTRADOR`. La lista y el detalle no exponen hashes.
+- El registro público admite ciudadano y operador. El rol por defecto es ciudadano y rechaza administrador. Los roles internos de Neon y del JWT son `CIUDADANO`, `OPERADOR` y `ADMINISTRADOR`; las respuestas públicas usan minúsculas para conservar el contrato del frontend.
+
+El alta administrativa `POST /api/usuarios` recibe `nombre`, `correo`, `telefono`, `rol`, `estado` y `password`. La contraseña es obligatoria y se guarda con BCrypt. El administrador puede crear otras cuentas desde este endpoint protegido.
+
+## Frontend local
+
+El frontend está en la carpeta RescateVial-front. Su `.env.local` usa `VITE_API_URL=http://localhost:8080`; iniciar con `npm run dev` y abrir `http://localhost:5173`. Para publicar, configurar una URL HTTPS del backend y autorizar el origen del frontend en `CORS_ORIGENES`.
+
+## Cuentas y comprobaciones
+
+Se prepararon cuentas locales de prueba para administrador, ciudadano y operador. Los correos y contraseñas están únicamente en `.env`, en las variables `TEST_ADMIN_*`, `TEST_CIUDADANO_*` y `TEST_OPERADOR_*`. No se incluyen credenciales en Git.
+
+Para el primer administrador de otra base: registrar una cuenta normal, cambiar únicamente su `id_rol` al rol ADMINISTRADOR con autorización del responsable y volver a iniciar sesión. La API pública no permite registrar administradores.
+
+La colección `postman/RescateVial-auth.postman_collection.json` cubre registro, login, perfil, roles, errores, CORS y administración. Importar `postman/auth.environment.example.json`, completar las contraseñas desde el `.env` local y seleccionar ese entorno. Con Postman CLI se puede ejecutar:
+
+```powershell
+postman collection run postman/RescateVial-auth.postman_collection.json -e RUTA_DEL_ENTORNO_PRIVADO.json --no-report-events
+```
+
+Verificación local: 15 pruebas Java, 26 solicitudes HTTP con 57 aserciones, 15 pruebas del frontend y compilación Vite correctas. También se probó en navegador el registro, los errores de login, el acceso al panel, la restricción de Usuarios y el cierre de sesión.
 
 ## Estructuras de datos
 
