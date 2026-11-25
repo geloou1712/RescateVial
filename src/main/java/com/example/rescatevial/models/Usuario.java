@@ -1,4 +1,10 @@
 package com.example.rescatevial.models;
 
-public record Usuario(Long id, String nombre, String correo, String telefono, String rol, String estado) {
+public record Usuario(
+        int id,
+        String nombre,
+        String correo,
+        String contrasenaHash,
+        String estado,
+        String rol) {
 }
