@@ -1,0 +1,778 @@
+{
+  "info": {
+    "name": "RescateVial - Autenticación local",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Pruebas reales de autenticación, validación, CORS y roles. Usar un entorno privado con las credenciales de prueba de .env. La colección admite cuentas de prueba existentes y comprueba sus credenciales mediante login."
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    }
+  ],
+  "item": [
+    {
+      "name": "Salud pública",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/health"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Conexión real con Neon",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/health/db"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Neon disponible\", () => pm.expect(pm.response.json().estado).to.eql(\"UP\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Perfil exige token",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/auth/yo"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 401\", () => pm.response.to.have.status(401));",
+              "pm.test(\"Error compatible con el frontend\", () => pm.expect(pm.response.json().message).to.be.a(\"string\").and.not.empty);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Validación del registro",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/auth/registro",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"name\":\"\",\"email\":\"invalido\",\"password\":\"1\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));",
+              "pm.test(\"Error compatible con el frontend\", () => pm.expect(pm.response.json().message).to.be.a(\"string\").and.not.empty);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Bloqueo de registro administrativo",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/auth/registro",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"name\":\"Intento admin\",\"email\":\"no-crear@example.invalid\",\"password\":\"clave123\",\"role\":\"administrador\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 403\", () => pm.response.to.have.status(403));",
+              "pm.test(\"Error compatible con el frontend\", () => pm.expect(pm.response.json().message).to.be.a(\"string\").and.not.empty);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Registro de ciudadano",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/auth/registro",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"name\":\"Ciudadano de prueba\",\"email\":\"{{citizenEmail}}\",\"password\":\"{{citizenPassword}}\",\"role\":\"ciudadano\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Registro inicial o cuenta de prueba previa\", () => pm.expect([201, 409]).to.include(pm.response.code));",
+              "pm.test(\"Contrato del registro\", () => { const result = pm.response.json(); if (pm.response.code === 201) { pm.expect(result.role).to.eql(\"ciudadano\"); pm.expect(result.roles).to.eql([\"ciudadano\"]); pm.expect(result.id).to.be.a(\"number\"); } else { pm.expect(result.message).to.be.a(\"string\"); } });",
+              "pm.test(\"La respuesta no expone contraseñas\", () => pm.expect(pm.response.text()).not.to.match(/contrasenaHash|contrasena_hash|password/));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Correo duplicado",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/auth/registro",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"name\":\"Duplicado\",\"email\":\"{{citizenEmail}}\",\"password\":\"{{citizenPassword}}\",\"role\":\"ciudadano\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 409\", () => pm.response.to.have.status(409));",
+              "pm.test(\"Error compatible con el frontend\", () => pm.expect(pm.response.json().message).to.be.a(\"string\").and.not.empty);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Contraseña incorrecta",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/auth/login",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"email\":\"{{citizenEmail}}\",\"password\":\"incorrecta\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 401\", () => pm.response.to.have.status(401));",
+              "pm.test(\"Error compatible con el frontend\", () => pm.expect(pm.response.json().message).to.be.a(\"string\").and.not.empty);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Login de ciudadano",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/auth/login",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"email\":\"{{citizenEmail}}\",\"password\":\"{{citizenPassword}}\",\"role\":\"ciudadano\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Token y contrato del login\", () => { const result = pm.response.json(); pm.expect(result.token).to.be.a(\"string\").and.not.empty; pm.expect(result.user.role).to.eql(\"ciudadano\"); pm.environment.set(\"citizenToken\", result.token); });",
+              "pm.test(\"La respuesta no expone contraseñas\", () => pm.expect(pm.response.text()).not.to.match(/contrasenaHash|contrasena_hash|password/));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Perfil del ciudadano",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{citizenToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/auth/yo"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Usuario del token\", () => pm.expect(pm.response.json().email).to.eql(pm.environment.get(\"citizenEmail\")));",
+              "pm.test(\"La respuesta no expone contraseñas\", () => pm.expect(pm.response.text()).not.to.match(/contrasenaHash|contrasena_hash|password/));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Ciudadano no administra usuarios",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{citizenToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/usuarios"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 403\", () => pm.response.to.have.status(403));",
+              "pm.test(\"Error compatible con el frontend\", () => pm.expect(pm.response.json().message).to.be.a(\"string\").and.not.empty);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Ciudadano no crea usuarios",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{citizenToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/usuarios",
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 403\", () => pm.response.to.have.status(403));",
+              "pm.test(\"Error compatible con el frontend\", () => pm.expect(pm.response.json().message).to.be.a(\"string\").and.not.empty);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Incidentes exige token",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/incidentes"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 401\", () => pm.response.to.have.status(401));",
+              "pm.test(\"Error compatible con el frontend\", () => pm.expect(pm.response.json().message).to.be.a(\"string\").and.not.empty);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Ciudadano consulta incidentes",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{citizenToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/incidentes"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Token inválido",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer invalido"
+          }
+        ],
+        "url": "{{baseUrl}}/api/auth/yo"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 401\", () => pm.response.to.have.status(401));",
+              "pm.test(\"Error compatible con el frontend\", () => pm.expect(pm.response.json().message).to.be.a(\"string\").and.not.empty);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Rol ajeno en login",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/auth/login",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"email\":\"{{citizenEmail}}\",\"password\":\"{{citizenPassword}}\",\"role\":\"administrador\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 403\", () => pm.response.to.have.status(403));",
+              "pm.test(\"Error compatible con el frontend\", () => pm.expect(pm.response.json().message).to.be.a(\"string\").and.not.empty);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Preflight del frontend",
+      "request": {
+        "method": "OPTIONS",
+        "header": [
+          {
+            "key": "Origin",
+            "value": "http://localhost:5173"
+          },
+          {
+            "key": "Access-Control-Request-Method",
+            "value": "POST"
+          },
+          {
+            "key": "Access-Control-Request-Headers",
+            "value": "content-type"
+          }
+        ],
+        "url": "{{baseUrl}}/api/auth/login"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"CORS permite el frontend local\", () => pm.expect(pm.response.headers.get(\"Access-Control-Allow-Origin\")).to.eql(\"http://localhost:5173\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Preflight con origen ajeno",
+      "request": {
+        "method": "OPTIONS",
+        "header": [
+          {
+            "key": "Origin",
+            "value": "https://origen-no-autorizado.example"
+          },
+          {
+            "key": "Access-Control-Request-Method",
+            "value": "POST"
+          }
+        ],
+        "url": "{{baseUrl}}/api/auth/login"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 403\", () => pm.response.to.have.status(403));",
+              "pm.test(\"CORS rechaza el origen ajeno\", () => pm.expect(pm.response.headers.has(\"Access-Control-Allow-Origin\")).to.eql(false));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Login de administrador",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/auth/login",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"email\":\"{{adminEmail}}\",\"password\":\"{{adminPassword}}\",\"role\":\"administrador\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Administrador confirmado por la API\", () => { const result = pm.response.json(); pm.expect(result.user.role).to.eql(\"administrador\"); pm.environment.set(\"adminToken\", result.token); pm.environment.set(\"adminId\", result.user.id); });",
+              "pm.test(\"La respuesta no expone contraseñas\", () => pm.expect(pm.response.text()).not.to.match(/contrasenaHash|contrasena_hash|password/));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Administrador consulta usuarios de Neon",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{adminToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/usuarios"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Lista de usuarios persistidos\", () => { const users = pm.response.json(); pm.expect(users).to.be.an(\"array\"); pm.expect(users.some(user => user.correo === pm.environment.get(\"citizenEmail\"))).to.eql(true); });",
+              "pm.test(\"La respuesta no expone contraseñas\", () => pm.expect(pm.response.text()).not.to.match(/contrasenaHash|contrasena_hash|password/));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Detalle administrativo",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{adminToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/usuarios/{{adminId}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"La respuesta no expone contraseñas\", () => pm.expect(pm.response.text()).not.to.match(/contrasenaHash|contrasena_hash|password/));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Administrador crea operador con datos de contacto",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{adminToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/usuarios",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"nombre\":\"Operador de prueba\",\"correo\":\"{{operatorEmail}}\",\"telefono\":\"5550000000\",\"rol\":\"OPERADOR\",\"estado\":\"ACTIVO\",\"password\":\"{{operatorPassword}}\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Alta inicial o cuenta de operador previa\", () => pm.expect([201, 409]).to.include(pm.response.code));",
+              "pm.test(\"Datos administrativos sin pérdida\", () => { const user = pm.response.json(); if (pm.response.code === 201) { pm.expect(user.telefono).to.eql(\"5550000000\"); pm.expect(user.rol).to.eql(\"OPERADOR\"); pm.expect(user.estado).to.eql(\"ACTIVO\"); } else { pm.expect(user.message).to.be.a(\"string\"); } });",
+              "pm.test(\"La respuesta no expone contraseñas\", () => pm.expect(pm.response.text()).not.to.match(/contrasenaHash|contrasena_hash|password/));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Login de operador",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/auth/login",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"email\":\"{{operatorEmail}}\",\"password\":\"{{operatorPassword}}\",\"role\":\"operador\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "pm.test(\"Rol de operador compatible con el frontend\", () => { const result = pm.response.json(); pm.expect(result.user.role).to.eql(\"operador\"); pm.environment.set(\"operatorToken\", result.token); });",
+              "pm.test(\"La respuesta no expone contraseñas\", () => pm.expect(pm.response.text()).not.to.match(/contrasenaHash|contrasena_hash|password/));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Operador no administra usuarios",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{operatorToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/usuarios"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 403\", () => pm.response.to.have.status(403));",
+              "pm.test(\"Error compatible con el frontend\", () => pm.expect(pm.response.json().message).to.be.a(\"string\").and.not.empty);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "JSON inválido",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/auth/login",
+        "body": {
+          "mode": "raw",
+          "raw": "{invalido",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));",
+              "pm.test(\"Error compatible con el frontend\", () => pm.expect(pm.response.json().message).to.be.a(\"string\").and.not.empty);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Cuerpo ausente",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/auth/login"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));",
+              "pm.test(\"Error compatible con el frontend\", () => pm.expect(pm.response.json().message).to.be.a(\"string\").and.not.empty);"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
