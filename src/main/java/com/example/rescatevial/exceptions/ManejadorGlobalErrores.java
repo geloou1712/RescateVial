@@ -7,6 +7,8 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.server.ResponseStatusException;
@@ -30,6 +32,18 @@ public class ManejadorGlobalErrores {
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<ErrorRespuesta> manejarTipoInvalido(HttpServletRequest solicitud) {
         return crearRespuesta(HttpStatus.BAD_REQUEST, "Uno de los parámetros tiene un formato inválido", solicitud);
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorRespuesta> manejarValidacion(MethodArgumentNotValidException error, HttpServletRequest solicitud) {
+        String mensaje = error.getBindingResult().getFieldErrors().stream()
+                .map(campo -> campo.getDefaultMessage()).findFirst().orElse("Revisa los datos enviados");
+        return crearRespuesta(HttpStatus.BAD_REQUEST, mensaje, solicitud);
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ErrorRespuesta> manejarConflicto(HttpServletRequest solicitud) {
+        return crearRespuesta(HttpStatus.CONFLICT, "Los datos ya existen o no cumplen las restricciones de la base", solicitud);
     }
 
     private ResponseEntity<ErrorRespuesta> crearRespuesta(HttpStatusCode estado, String mensaje,
