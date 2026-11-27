@@ -1,0 +1,17 @@
+# Only build inputs enter the Docker context. Secrets and local artifacts stay out.
+**
+!Dockerfile
+!.dockerignore
+!gradlew
+!build.gradle
+!settings.gradle
+!gradle/
+!gradle/**
+!src/
+!src/**
+**/.env
+**/.env.*
+**/*.pem
+**/*.key
+**/application-local.*
+**/application-secret*

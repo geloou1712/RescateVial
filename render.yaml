@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: rescatevial-api
+    runtime: docker
+    plan: free
+    repo: https://github.com/geloou1712/RescateVial
+    branch: develop
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /api/health
+    autoDeployTrigger: off
+    envVars:
+      - key: DB_URL
+        sync: false
+      - key: DB_USERNAME
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: JWT_EXPIRACION_HORAS
+        value: "8"
+      - key: CORS_ORIGENES
+        value: https://rescatevialfr.vercel.app
